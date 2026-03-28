@@ -1,60 +1,88 @@
 {
-  "name": "Lolita Bonita",
+  "name": "Paloma",
   "pets": [
     {
-      "name": "Tortuga Lola",
-      "age": 1,
+      "name": "Tobi",
+      "age": 3,
+      "breed": "Husky",
+      "health_conditions": ["hip dysplasia"],
+      "tasks": [
+        {
+          "name": "Morning Walk",
+          "duration": 30,
+          "time": "07:00",
+          "frequency": "daily",
+          "priority": "high",
+          "due_date": "2026-03-28",
+          "pet_name": "Tobi",
+          "is_complete": false
+        },
+        {
+          "name": "Breakfast",
+          "duration": 15,
+          "time": "08:00",
+          "frequency": "daily",
+          "priority": "high",
+          "due_date": "2026-03-28",
+          "pet_name": "Tobi",
+          "is_complete": false
+        },
+        {
+          "name": "Hip Supplement",
+          "duration": 5,
+          "time": "08:00",
+          "frequency": "daily",
+          "priority": "high",
+          "due_date": "2026-03-28",
+          "pet_name": "Tobi",
+          "is_complete": false
+        },
+        {
+          "name": "Evening Walk",
+          "duration": 45,
+          "time": "18:00",
+          "frequency": "daily",
+          "priority": "medium",
+          "due_date": "2026-03-28",
+          "pet_name": "Tobi",
+          "is_complete": false
+        }
+      ]
+    },
+    {
+      "name": "Lolita Tortuga",
+      "age": 2,
       "breed": "Patas Rojas",
       "health_conditions": [],
       "tasks": [
         {
-          "name": "Ba\u00f1ar a Lola",
-          "duration": 30,
-          "time": "8:00",
-          "frequency": "daily",
+          "name": "Shell Bath",
+          "duration": 20,
+          "time": "10:00",
+          "frequency": "weekly",
           "priority": "medium",
           "due_date": "2026-03-28",
-          "pet_name": "Tortuga Lola",
+          "pet_name": "Lolita Tortuga",
           "is_complete": false
         },
         {
-          "name": "Feed",
+          "name": "Feeding",
+          "duration": 10,
+          "time": "12:00",
+          "frequency": "daily",
+          "priority": "high",
+          "due_date": "2026-03-28",
+          "pet_name": "Lolita Tortuga",
+          "is_complete": false
+        },
+        {
+          "name": "Sunlight Time",
           "duration": 30,
-          "time": "10:00",
+          "time": "14:00",
           "frequency": "daily",
           "priority": "low",
           "due_date": "2026-03-28",
-          "pet_name": "Tortuga Lola",
-          "is_complete": false
-        },
-        {
-          "name": "Pill",
-          "duration": 30,
-          "time": "17:00",
-          "frequency": "daily",
-          "priority": "high",
-          "due_date": "2026-03-28",
-          "pet_name": "Tortuga Lola",
-          "is_complete": false
-        },
-        {
-          "name": "COnflicto test",
-          "duration": 30,
-          "time": "8:15",
-          "frequency": "daily",
-          "priority": "medium",
-          "due_date": "2026-03-28",
-          "pet_name": "Tortuga Lola",
-          "is_complete": false
-        },
-        {
-          "name": "jugar",
-          "duration": 30,
-          "time": "8:00",
-          "frequency": "daily",
-          "priority": "high",
-          "due_date": "2026-03-28",
-          "pet_name": "Tortuga Lola",
+          "pet_name": "Lolita Tortuga",
           "is_complete": false
         }
       ]
