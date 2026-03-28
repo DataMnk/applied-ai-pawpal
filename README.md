@@ -90,3 +90,22 @@ The test suite covers 16 behaviors including:
 <a href="demo_screenshot.png" target="_blank">
 <img src='demo_screenshot.png' title='PawPal+ App' width='600' alt='PawPal App'/>
 </a>
+
+
+## 🚀 Optional Extensions Completed
+
+- **Challenge 1: Next Available Slot** — When conflicts 
+  are detected, the app suggests the next free time slot 
+  using interval-based overlap detection.
+
+- **Challenge 2: Data Persistence** — Pets and tasks are 
+  saved to `data.json` automatically and reloaded on 
+  startup. Data survives page reloads and app restarts.
+
+- **Challenge 3: Priority-Based Scheduling** — Users can 
+  switch between "By time (chronological)" and 
+  "By priority, then time" sort modes.
+
+- **Challenge 4: Professional UI** — Custom pet-care theme 
+  with Nunito font, purple-green gradient header, priority 
+  emojis (🔴🟡🟢), and color-coded conflict warnings.

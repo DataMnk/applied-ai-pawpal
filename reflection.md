@@ -53,11 +53,27 @@ The most effective prompts were specific and structured: stating what file to re
 
 The moment that surprised me most was when the Streamlit app appeared live in the browser for the first time — seeing the backend logic I had built respond to real user input in real time made everything click. Mermaid.js was also a highlight: turning a text description into a visual class diagram instantly is something I'll use in every future project.
 
+An important Cursor workflow discovery: reusing the correct 
+chat history context instead of starting a new chat every 
+time. When fixing a CSS issue, returning to the original 
+theme chat gives the AI the full styling context — leading 
+to more accurate fixes. New chat = clean context for new 
+features. Existing chat = better context for related fixes.
+
 **b. Judgment and verification**
 
 The clearest example of human oversight paying off was during the AI review of the class skeletons. Cursor flagged five issues — I accepted two (adding `due_date` and `pet_name` to Task), partially accepted one (kept `time` as string instead of `datetime.time`), and deferred two to a later phase. Accepting everything blindly would have added unnecessary complexity too early.
 
 A second example: when Cursor suggested extracting a named `_task_sort_key` function for readability, I evaluated it, agreed it was cleaner, and accepted it. That's the right loop — AI suggests, human evaluates, human decides.
+
+A key lesson learned during the Optional Extensions: 
+after implementing interval overlap in detect_conflicts(), 
+the warning boxes appeared empty — which looked like a 
+regression. The real issue was a CSS contrast problem, 
+not broken logic. This reinforced two habits: always run 
+pytest after every change before committing, and always 
+verify manually in the browser. Automated tests catch 
+logic regressions; manual testing catches visual ones.
 
 ---
 
