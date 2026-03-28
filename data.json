@@ -16,6 +16,26 @@
           "due_date": "2026-03-28",
           "pet_name": "Tortuga Lola",
           "is_complete": false
+        },
+        {
+          "name": "Feed",
+          "duration": 30,
+          "time": "10:00",
+          "frequency": "daily",
+          "priority": "low",
+          "due_date": "2026-03-28",
+          "pet_name": "Tortuga Lola",
+          "is_complete": false
+        },
+        {
+          "name": "Pill",
+          "duration": 30,
+          "time": "17:00",
+          "frequency": "daily",
+          "priority": "high",
+          "due_date": "2026-03-28",
+          "pet_name": "Tortuga Lola",
+          "is_complete": false
         }
       ]
     }

@@ -405,17 +405,35 @@ st.divider()
 st.subheader("Schedule")
 scheduler = Scheduler(owner)
 
+_schedule_sort_options = (
+    "By time (chronological)",
+    "By priority, then time",
+)
+schedule_sort_mode = st.selectbox(
+    "Sort schedule by",
+    _schedule_sort_options,
+    key="schedule_sort_mode",
+)
+
 if st.button("Generate schedule", type="primary"):
     st.session_state.schedule_generated = True
     st.rerun()
 
 if st.session_state.schedule_generated:
     all_tasks = scheduler.get_all_tasks()
-    scheduled = scheduler.generate_schedule()
+    if schedule_sort_mode == "By time (chronological)":
+        scheduled = scheduler.generate_schedule()
+    else:
+        scheduled = scheduler.sort_by_priority_then_time(all_tasks)
     conflicts = scheduler.detect_conflicts(all_tasks)
 
     if scheduled:
-        st.success(f"{len(scheduled)} task(s) ordered by time.")
+        order_note = (
+            "time"
+            if schedule_sort_mode == "By time (chronological)"
+            else "priority, then time"
+        )
+        st.success(f"{len(scheduled)} task(s) ordered by {order_note}.")
 
     if conflicts:
         by_time: defaultdict[str, list] = defaultdict(list)

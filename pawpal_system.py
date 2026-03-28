@@ -28,6 +28,10 @@ def _task_sort_key(task: Task) -> tuple[tuple[int, int], int]:
     return (_parse_time_key(task.time), _priority_rank(task.priority))
 
 
+def _priority_then_time_sort_key(task: Task) -> tuple[int, tuple[int, int]]:
+    return (_priority_rank(task.priority), _parse_time_key(task.time))
+
+
 @dataclass
 class Task:
     name: str
@@ -146,6 +150,10 @@ class Scheduler:
         Same time breaks ties by priority (high first).
         """
         return sorted(tasks, key=_task_sort_key)
+
+    def sort_by_priority_then_time(self, tasks: List[Task]) -> List[Task]:
+        """Return tasks ordered by priority (high → medium → low), then by time."""
+        return sorted(tasks, key=_priority_then_time_sort_key)
 
     def filter_tasks(self, criteria: str) -> List[Task]:
         """Return tasks matching completion keywords or a pet name."""
