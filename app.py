@@ -1,11 +1,21 @@
 from collections import defaultdict
 from datetime import date
+import json
+from pathlib import Path
 
 import streamlit as st
 
 from pawpal_system import Owner, Pet, Scheduler, Task
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
+
+DATA_PATH = Path(__file__).resolve().parent / "data.json"
+
+
+def _persist_owner() -> None:
+    o = st.session_state.get("owner")
+    if o is not None:
+        o.save_to_json(DATA_PATH)
 
 
 def _inject_pawpal_theme() -> None:
@@ -276,6 +286,10 @@ _inject_pawpal_theme()
 
 if "owner" not in st.session_state:
     st.session_state.owner = None
+    try:
+        st.session_state.owner = Owner.load_from_json(DATA_PATH)
+    except (FileNotFoundError, json.JSONDecodeError, KeyError, TypeError, ValueError):
+        pass
 if "schedule_generated" not in st.session_state:
     st.session_state.schedule_generated = False
 
@@ -301,6 +315,7 @@ if st.button("Initialize owner", type="primary"):
     else:
         st.session_state.owner = Owner(name=owner_name.strip())
         st.session_state.schedule_generated = False
+        _persist_owner()
         st.success(f"Owner **{owner_name.strip()}** is ready.")
         st.rerun()
 
@@ -326,6 +341,7 @@ if st.button("Add pet"):
         st.error("Pet name is required.")
     else:
         owner.add_pet(Pet(name=pet_name.strip(), age=int(pet_age), breed=pet_breed.strip() or "—"))
+        _persist_owner()
         st.rerun()
 
 if owner.pets:
@@ -380,6 +396,7 @@ else:
                 pet_name=pet.name,
             )
             pet.add_task(task)
+            _persist_owner()
             st.rerun()
 
 st.divider()

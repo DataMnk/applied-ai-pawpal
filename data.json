@@ -1,0 +1,23 @@
+{
+  "name": "Lolita Bonita",
+  "pets": [
+    {
+      "name": "Tortuga Lola",
+      "age": 1,
+      "breed": "Patas Rojas",
+      "health_conditions": [],
+      "tasks": [
+        {
+          "name": "Ba\u00f1ar a Lola",
+          "duration": 30,
+          "time": "8:00",
+          "frequency": "daily",
+          "priority": "medium",
+          "due_date": "2026-03-28",
+          "pet_name": "Tortuga Lola",
+          "is_complete": false
+        }
+      ]
+    }
+  ]
+}

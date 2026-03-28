@@ -1,5 +1,8 @@
 """Tests for pawpal_system: tasks, pets, scheduling, and conflicts."""
 
+from pathlib import Path
+import tempfile
+
 from pawpal_system import Owner, Pet, Scheduler, Task
 
 
@@ -293,3 +296,53 @@ def test_detect_conflicts_three_tasks_same_time_all_included():
 
     assert len(conflicts) == 3
     assert a in conflicts and b in conflicts and c in conflicts
+
+
+def test_owner_save_and_load_json_roundtrip():
+    owner = Owner("Jamie")
+    pet = Pet(name="Milo", age=4, breed="Beagle", health_conditions=["pollen"])
+    t = _task("Morning walk", "07:00")
+    pet.add_task(t)
+    owner.add_pet(pet)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "data.json"
+        owner.save_to_json(path)
+        loaded = Owner.load_from_json(path)
+
+    assert loaded.name == "Jamie"
+    assert len(loaded.pets) == 1
+    assert loaded.pets[0].name == "Milo"
+    assert loaded.pets[0].age == 4
+    assert loaded.pets[0].breed == "Beagle"
+    assert loaded.pets[0].health_conditions == ["pollen"]
+    assert len(loaded.pets[0].tasks) == 1
+    assert loaded.pets[0].tasks[0].name == "Morning walk"
+    assert loaded.pets[0].tasks[0].time == "07:00"
+    assert loaded.pets[0].tasks[0].is_complete is False
+
+
+def test_owner_load_json_preserves_task_is_complete():
+    owner = Owner("Alex")
+    pet = Pet(name="Luna", age=2, breed="Tabby")
+    t = _task("Feed", "08:00", pet_name="Luna")
+    t.mark_complete()
+    pet.add_task(t)
+    owner.add_pet(pet)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "snap.json"
+        owner.save_to_json(path)
+        loaded = Owner.load_from_json(path)
+
+    assert loaded.pets[0].tasks[0].is_complete is True
+
+
+def test_owner_save_load_empty_pets():
+    owner = Owner("Solo")
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "empty.json"
+        owner.save_to_json(path)
+        loaded = Owner.load_from_json(path)
+    assert loaded.name == "Solo"
+    assert loaded.pets == []

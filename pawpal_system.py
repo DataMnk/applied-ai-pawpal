@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import json
 from collections import Counter
 from dataclasses import dataclass, field, replace
 from datetime import date, timedelta
+from pathlib import Path
 from typing import List, Optional
 
 _COMPLETE_CRITERIA = frozenset({"complete", "completed", "done", "true", "yes"})
@@ -64,6 +66,67 @@ class Owner:
     def add_pet(self, pet: Pet) -> None:
         """Append a pet to this owner's pet list."""
         self.pets.append(pet)
+
+    def save_to_json(self, filepath: str | Path) -> None:
+        """Serialize this owner, all pets, and their tasks to a JSON file."""
+        path = Path(filepath)
+        payload = {
+            "name": self.name,
+            "pets": [
+                {
+                    "name": pet.name,
+                    "age": pet.age,
+                    "breed": pet.breed,
+                    "health_conditions": list(pet.health_conditions),
+                    "tasks": [
+                        {
+                            "name": task.name,
+                            "duration": task.duration,
+                            "time": task.time,
+                            "frequency": task.frequency,
+                            "priority": task.priority,
+                            "due_date": task.due_date,
+                            "pet_name": task.pet_name,
+                            "is_complete": task.is_complete,
+                        }
+                        for task in pet.tasks
+                    ],
+                }
+                for pet in self.pets
+            ],
+        }
+        path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+    @classmethod
+    def load_from_json(cls, filepath: str | Path) -> Owner:
+        """Load an owner with pets and tasks from a JSON file."""
+        path = Path(filepath)
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        pets_out: List[Pet] = []
+        for p_raw in raw.get("pets", []):
+            task_objs = [
+                Task(
+                    name=t["name"],
+                    duration=int(t["duration"]),
+                    time=t["time"],
+                    frequency=t["frequency"],
+                    priority=t["priority"],
+                    due_date=t["due_date"],
+                    pet_name=t["pet_name"],
+                    is_complete=bool(t.get("is_complete", False)),
+                )
+                for t in p_raw.get("tasks", [])
+            ]
+            pets_out.append(
+                Pet(
+                    name=p_raw["name"],
+                    age=int(p_raw["age"]),
+                    breed=p_raw["breed"],
+                    health_conditions=list(p_raw.get("health_conditions", [])),
+                    tasks=task_objs,
+                )
+            )
+        return cls(name=raw["name"], pets=pets_out)
 
 
 class Scheduler:
