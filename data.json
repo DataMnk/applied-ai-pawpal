@@ -36,6 +36,26 @@
           "due_date": "2026-03-28",
           "pet_name": "Tortuga Lola",
           "is_complete": false
+        },
+        {
+          "name": "COnflicto test",
+          "duration": 30,
+          "time": "8:15",
+          "frequency": "daily",
+          "priority": "medium",
+          "due_date": "2026-03-28",
+          "pet_name": "Tortuga Lola",
+          "is_complete": false
+        },
+        {
+          "name": "jugar",
+          "duration": 30,
+          "time": "8:00",
+          "frequency": "daily",
+          "priority": "high",
+          "due_date": "2026-03-28",
+          "pet_name": "Tortuga Lola",
+          "is_complete": false
         }
       ]
     }

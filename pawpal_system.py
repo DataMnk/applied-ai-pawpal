@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-from collections import Counter
 from dataclasses import dataclass, field, replace
 from datetime import date, timedelta
 from pathlib import Path
@@ -201,10 +200,20 @@ class Scheduler:
         return new_task
 
     def detect_conflicts(self, tasks: List[Task]) -> List[Task]:
-        """Return tasks whose time string appears more than once in the list."""
-        counts = Counter(t.time for t in tasks)
-        conflict_times = {time for time, n in counts.items() if n > 1}
-        return [t for t in tasks if t.time in conflict_times]
+        """Return tasks whose interval [time, time + duration) overlaps another's."""
+        conflicted: set[int] = set()
+        n = len(tasks)
+        for i in range(n):
+            for j in range(i + 1, n):
+                a, b = tasks[i], tasks[j]
+                a0 = _total_minutes_from_hhmm(a.time)
+                a1 = a0 + int(a.duration)
+                b0 = _total_minutes_from_hhmm(b.time)
+                b1 = b0 + int(b.duration)
+                if _intervals_overlap(a0, a1, b0, b1):
+                    conflicted.add(id(a))
+                    conflicted.add(id(b))
+        return [t for t in tasks if id(t) in conflicted]
 
     def _task_blocks_interval(self, task: Task, cand_start: int, cand_end: int) -> bool:
         t0 = _total_minutes_from_hhmm(task.time)

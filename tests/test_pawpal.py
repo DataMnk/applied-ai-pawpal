@@ -232,6 +232,18 @@ def test_detect_conflicts_flags_tasks_at_same_time():
     assert grooming not in conflicts
 
 
+def test_detect_conflicts_catches_interval_overlap():
+    """08:00–08:30 overlaps 08:15–08:35; both tasks should be flagged."""
+    t1 = _task("Task 1", "08:00", duration=30)
+    t2 = _task("Task 2", "08:15", duration=20)
+
+    scheduler = Scheduler(Owner("Sam"))
+    conflicts = scheduler.detect_conflicts([t1, t2])
+
+    assert len(conflicts) == 2
+    assert t1 in conflicts and t2 in conflicts
+
+
 def test_generate_schedule_two_pets_interleaved_times_chronological():
     owner = Owner("Alex")
     pet_a = Pet(name="Milo", age=3, breed="Beagle")
