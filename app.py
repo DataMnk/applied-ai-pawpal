@@ -259,9 +259,25 @@ div[data-testid="stDataFrame"],
   border: 1px solid var(--pp-purple-mist) !important;
 }
 
-.stAlert, [data-testid="stNotification"] {
+.stAlert,
+.stAlertContainer,
+[data-testid="stNotification"] {
   border-radius: 14px !important;
   font-family: "Nunito", sans-serif !important;
+}
+
+/* st.warning — stronger contrast vs cream page (Streamlit: stAlertContentWarning) */
+div[data-testid="stAlertContainer"]:has([data-testid="stAlertContentWarning"]) {
+  background: linear-gradient(135deg, #fff0c8 0%, #ffe08a 55%, #ffd666 100%) !important;
+  background-color: #ffe08a !important;
+  border: 2px solid #d97706 !important;
+  box-shadow: 0 4px 20px rgba(217, 119, 6, 0.28) !important;
+}
+div[data-testid="stAlertContainer"]:has([data-testid="stAlertContentWarning"]) [data-testid="stMarkdownContainer"],
+div[data-testid="stAlertContainer"]:has([data-testid="stAlertContentWarning"]) [data-testid="stMarkdownContainer"] p,
+div[data-testid="stAlertContainer"]:has([data-testid="stAlertContentWarning"]) [data-testid="stMarkdownContainer"] li,
+div[data-testid="stAlertContainer"]:has([data-testid="stAlertContentWarning"]) [data-testid="stMarkdownContainer"] span {
+  color: #5c3d10 !important;
 }
 
 .stCaption, .stMarkdown p, .stMarkdown li {
