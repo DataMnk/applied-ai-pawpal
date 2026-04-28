@@ -1,69 +1,46 @@
-from rag_engine import get_care_insight
+from rag_engine import baseline_get_care_insight, get_care_insight
 
 FALLBACK_MESSAGE = "Care insight unavailable right now."
 
-TEST_CASES = [
-    {
-        "pet_name": "Tobi",
-        "conditions": ["hip dysplasia"],
-        "context": "morning walk at 07:00",
-    },
-    {
-        "pet_name": "Luna",
-        "conditions": ["diabetes"],
-        "context": "insulin injection at 08:00",
-    },
-    {
-        "pet_name": "Max",
-        "conditions": [],
-        "context": "feeding at 09:00",
-    },
-    {
-        "pet_name": "Bella",
-        "conditions": ["hip dysplasia", "arthritis"],
-        "context": "evening walk at 18:00",
-    },
-]
-
-
-def _preview_response(text: str, length: int = 100) -> str:
-    return text.replace("\n", " ")[:length]
+TEST_CASE_1 = {
+    "pet_name": "Tobi",
+    "conditions": ["hip dysplasia"],
+    "context": "morning walk at 07:00",
+}
 
 
 def run_evaluation() -> None:
-    total_tests = len(TEST_CASES)
-    passed = 0
-    confidence_scores: list[float] = []
+    print("=== PawPal+ Specialization Comparison (Test Case 1) ===")
+    print(f"Pet: {TEST_CASE_1['pet_name']}")
+    print(f"Conditions: {', '.join(TEST_CASE_1['conditions'])}")
+    print(f"Schedule context: {TEST_CASE_1['context']}\n")
 
-    print("=== PawPal+ RAG Evaluation ===")
-    for idx, case in enumerate(TEST_CASES, start=1):
-        response, _sources = get_care_insight(
-            pet_name=case["pet_name"],
-            health_conditions=case["conditions"],
-            schedule_context=case["context"],
-        )
+    specialized_response, specialized_sources = get_care_insight(
+        pet_name=TEST_CASE_1["pet_name"],
+        health_conditions=TEST_CASE_1["conditions"],
+        schedule_context=TEST_CASE_1["context"],
+    )
 
-        is_pass = response != FALLBACK_MESSAGE
-        confidence = 1.0 if is_pass else 0.0
-        status = "PASS" if is_pass else "FAIL"
+    baseline_response, _baseline_sources = baseline_get_care_insight(
+        pet_name=TEST_CASE_1["pet_name"],
+        health_conditions=TEST_CASE_1["conditions"],
+        schedule_context=TEST_CASE_1["context"],
+    )
 
-        if is_pass:
-            passed += 1
-        confidence_scores.append(confidence)
+    print("=== Specialized (Few-shot + RAG) ===")
+    if specialized_response == FALLBACK_MESSAGE:
+        print("Care insight unavailable right now.")
+    else:
+        print(specialized_response)
+    print(
+        f"\nSources used: {', '.join(specialized_sources) if specialized_sources else 'none'}\n"
+    )
 
-        print(
-            f"Test {idx} | Pet: {case['pet_name']} | {status} | "
-            f"Response: {_preview_response(response)}"
-        )
-
-    failed = total_tests - passed
-    average_confidence = sum(confidence_scores) / total_tests if total_tests else 0.0
-
-    print("\n=== Summary ===")
-    print(f"Total tests: {total_tests}")
-    print(f"Passed: {passed}")
-    print(f"Failed: {failed}")
-    print(f"Average confidence score: {average_confidence:.2f}")
+    print("=== Baseline (No few-shot, No knowledge context) ===")
+    if baseline_response == FALLBACK_MESSAGE:
+        print("Care insight unavailable right now.")
+    else:
+        print(baseline_response)
 
 
 if __name__ == "__main__":

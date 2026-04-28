@@ -91,7 +91,48 @@ def get_care_insight(
     prompt = f"""
 You are PawPal+, a helpful pet care assistant.
 Use the provided context to generate a personalized care insight.
+Match the PawPal+ voice: practical, calm, and safety-first.
+Follow the same sectioned output style shown in the examples.
 
+Example 1
+Input:
+Pet name: Tobi
+Health conditions: hip dysplasia
+Schedule context: morning walk at 07:00
+
+Output:
+Morning:
+- Keep the walk short and gentle (10-15 minutes) on soft ground.
+- Do a 3-5 minute warm-up at a slow pace before stairs or hills.
+
+Midday:
+- Encourage low-impact movement and avoid jumping onto furniture.
+- Offer a supportive rest area to reduce hip strain between activities.
+
+Evening:
+- Use a calm leash walk and watch for limping or stiffness after activity.
+- If discomfort increases, reduce intensity and contact the vet for plan adjustments.
+
+Example 2
+Input:
+Pet name: Luna
+Health conditions: diabetes
+Schedule context: insulin injection at 08:00
+
+Output:
+Insulin Schedule:
+- Give insulin at consistent times each day, paired with meals.
+- Record dose time and appetite to spot routine changes early.
+
+Monitoring:
+- Track thirst, urination, appetite, and energy for daily trends.
+- If weakness, vomiting, or disorientation appears, contact a vet urgently.
+
+Diet:
+- Keep meal portions and carbohydrate profile consistent.
+- Avoid unplanned treats that can destabilize glucose control.
+
+Now respond for this request:
 Pet name: {pet_name}
 Health conditions: {conditions_text}
 Schedule context: {schedule_context}
@@ -118,4 +159,41 @@ Provide a short, practical, and safe care insight for this pet owner.
         return insight, sources
     except Exception as exc:
         print(f"[RAG] OpenAI API call failed: {exc}")
+        return FALLBACK_MESSAGE, sources
+
+
+def baseline_get_care_insight(
+    pet_name: str, health_conditions: list[str], schedule_context: str
+) -> tuple[str, list[str]]:
+    conditions_text = ", ".join(health_conditions) if health_conditions else "general wellness"
+    sources: list[str] = []
+
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        print("[RAG-BASELINE] OpenAI API call failed: OPENAI_API_KEY not set")
+        return FALLBACK_MESSAGE, sources
+
+    prompt = f"""
+You are a pet care assistant.
+Help with {pet_name} who has {conditions_text}.
+Schedule context: {schedule_context}.
+Provide a short, practical, and safe care insight for this pet owner.
+"""
+
+    try:
+        client = OpenAI(api_key=api_key)
+        response = client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=1024,
+        )
+        insight = (response.choices[0].message.content or "").strip()
+        if not insight:
+            print("[RAG-BASELINE] OpenAI API call failed: empty response")
+            return FALLBACK_MESSAGE, sources
+
+        print("[RAG-BASELINE] OpenAI API call succeeded")
+        return insight, sources
+    except Exception as exc:
+        print(f"[RAG-BASELINE] OpenAI API call failed: {exc}")
         return FALLBACK_MESSAGE, sources
