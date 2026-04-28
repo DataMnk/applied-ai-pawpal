@@ -6,6 +6,7 @@ from pathlib import Path
 import streamlit as st
 
 from pawpal_system import Owner, Pet, Scheduler, Task
+from rag_engine import get_care_insight
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
 
@@ -543,3 +544,25 @@ if st.session_state.schedule_generated:
                         }
                     )
                 st.dataframe(filter_rows, use_container_width=True, hide_index=True)
+
+    pets_with_health_conditions = [
+        p for p in owner.pets if getattr(p, "health_conditions", None)
+    ]
+    if pets_with_health_conditions:
+        st.subheader("🧠 AI Care Insights")
+        for pet in pets_with_health_conditions:
+            pet_tasks_today = [t for t in scheduled if t.pet_name == pet.name]
+            if pet_tasks_today:
+                schedule_context = "; ".join(
+                    f"{task.name} at {task.time}" for task in pet_tasks_today
+                )
+            else:
+                schedule_context = "No tasks scheduled today."
+
+            with st.spinner("Generating care insight..."):
+                insight = get_care_insight(
+                    pet.name,
+                    pet.health_conditions,
+                    schedule_context,
+                )
+            st.info(f"**{pet.name}**\n\n{insight}")
