@@ -3,14 +3,14 @@ import re
 from pathlib import Path
 
 from dotenv import load_dotenv
-import google.generativeai as genai
+from openai import OpenAI
 
 load_dotenv()
 
 KNOWLEDGE_DIR = Path(__file__).resolve().parent / "knowledge"
 TOP_K = 3
 FALLBACK_MESSAGE = "Care insight unavailable right now."
-MODEL_NAME = "gemini-1.5-flash"
+MODEL_NAME = "gpt-4o-mini"
 
 
 def _tokenize(text: str) -> set[str]:
@@ -78,9 +78,9 @@ def get_care_insight(pet_name: str, health_conditions: list[str], schedule_conte
     else:
         print("  (none)")
 
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
-        print("[RAG] Gemini API call failed: GEMINI_API_KEY not set")
+        print("[RAG] OpenAI API call failed: OPENAI_API_KEY not set")
         return FALLBACK_MESSAGE
 
     context_blocks = "\n\n---\n\n".join(chunk["text"] for chunk in retrieved) or "No relevant context retrieved."
@@ -99,16 +99,19 @@ Provide a short, practical, and safe care insight for this pet owner.
 """
 
     try:
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel(MODEL_NAME)
-        response = model.generate_content(prompt)
-        insight = (response.text or "").strip()
+        client = OpenAI(api_key=api_key)
+        response = client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=1024,
+        )
+        insight = (response.choices[0].message.content or "").strip()
         if not insight:
-            print("[RAG] Gemini API call failed: empty response")
+            print("[RAG] OpenAI API call failed: empty response")
             return FALLBACK_MESSAGE
 
-        print("[RAG] Gemini API call succeeded")
+        print("[RAG] OpenAI API call succeeded")
         return insight
     except Exception as exc:
-        print(f"[RAG] Gemini API call failed: {exc}")
+        print(f"[RAG] OpenAI API call failed: {exc}")
         return FALLBACK_MESSAGE
