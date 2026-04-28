@@ -560,9 +560,11 @@ if st.session_state.schedule_generated:
                 schedule_context = "No tasks scheduled today."
 
             with st.spinner("Generating care insight..."):
-                insight = get_care_insight(
+                insight, sources = get_care_insight(
                     pet.name,
                     pet.health_conditions,
                     schedule_context,
                 )
             st.info(f"**{pet.name}**\n\n{insight}")
+            if sources:
+                st.caption(f"📚 Sources: {', '.join(sources)}")

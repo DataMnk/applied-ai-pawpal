@@ -62,7 +62,9 @@ def _retrieve_chunks(query: str, chunks: list[dict[str, str]], top_k: int = TOP_
     return [chunk for _, chunk in scored_chunks[:top_k]]
 
 
-def get_care_insight(pet_name: str, health_conditions: list[str], schedule_context: str) -> str:
+def get_care_insight(
+    pet_name: str, health_conditions: list[str], schedule_context: str
+) -> tuple[str, list[str]]:
     conditions_text = ", ".join(health_conditions) if health_conditions else "general wellness"
     query = (
         f"pet name {pet_name} health conditions {conditions_text} "
@@ -78,10 +80,12 @@ def get_care_insight(pet_name: str, health_conditions: list[str], schedule_conte
     else:
         print("  (none)")
 
+    sources = list(dict.fromkeys(chunk["source"] for chunk in retrieved))
+
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         print("[RAG] OpenAI API call failed: OPENAI_API_KEY not set")
-        return FALLBACK_MESSAGE
+        return FALLBACK_MESSAGE, sources
 
     context_blocks = "\n\n---\n\n".join(chunk["text"] for chunk in retrieved) or "No relevant context retrieved."
     prompt = f"""
@@ -108,10 +112,10 @@ Provide a short, practical, and safe care insight for this pet owner.
         insight = (response.choices[0].message.content or "").strip()
         if not insight:
             print("[RAG] OpenAI API call failed: empty response")
-            return FALLBACK_MESSAGE
+            return FALLBACK_MESSAGE, sources
 
         print("[RAG] OpenAI API call succeeded")
-        return insight
+        return insight, sources
     except Exception as exc:
         print(f"[RAG] OpenAI API call failed: {exc}")
-        return FALLBACK_MESSAGE
+        return FALLBACK_MESSAGE, sources

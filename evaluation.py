@@ -37,7 +37,7 @@ def run_evaluation() -> None:
 
     print("=== PawPal+ RAG Evaluation ===")
     for idx, case in enumerate(TEST_CASES, start=1):
-        response = get_care_insight(
+        response, _sources = get_care_insight(
             pet_name=case["pet_name"],
             health_conditions=case["conditions"],
             schedule_context=case["context"],
