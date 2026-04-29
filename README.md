@@ -194,7 +194,7 @@ What to improve: keyword matching sometimes retrieved chunks from unrelated docu
 
 ## 🎥 Demo Walkthrough
 
-[Loom video link — to be added before submission]
+Loom video link: [https://www.loom.com/share/6d66c3d82924481596407cc613ed4687](https://www.loom.com/share/6d66c3d82924481596407cc613ed4687)
 
 ---
 
