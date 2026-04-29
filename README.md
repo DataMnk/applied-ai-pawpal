@@ -1,47 +1,58 @@
-# 🐾 PawPal+
+# 🐾 PawPal+ Applied AI System
 
-**PawPal+** is a smart pet care scheduling app built with Python and Streamlit. It helps busy pet owners stay consistent with their pets' daily routines by organizing care tasks, detecting scheduling conflicts, and generating a prioritized daily plan.
+**PawPal+** is a smart pet care scheduling app extended with a RAG (Retrieval-Augmented Generation) AI system. It helps busy pet owners organize daily care tasks, detect scheduling conflicts, and receive personalized AI care insights based on each pet's health conditions.
 
 ---
 
-## 📋 Scenario
+## 📋 Base Project
 
-A busy pet owner needs help staying consistent with pet care. They want an assistant that can:
+This project extends **PawPal+ (Module 2 — CodePath AI110)**. The original app was a Python + Streamlit scheduling system for pet owners. It allowed users to add pets and tasks, generate a prioritized daily schedule, detect time conflicts, and persist data to JSON. It included 24 automated pytest tests, all passing, and four optional challenges completed (next available slot, data persistence, priority sorting, custom UI theme).
 
-- Track pet care tasks (walks, feeding, meds, enrichment, grooming, etc.)
-- Consider constraints (time available, priority, owner preferences)
-- Produce a daily plan and explain why it chose that plan
+The new version adds a full RAG pipeline that generates personalized veterinary care insights directly inside the app.
 
 ---
 
 ## ✨ Features
 
-- **Time-based sorting** — Tasks are ordered chronologically by their scheduled `HH:MM` time, so your day reads top to bottom in the right order.
-- **Priority tie-breaking** — When two tasks share the same start time, high priority tasks appear first (high → medium → low).
-- **Conflict warnings** — The scheduler flags any tasks scheduled at the exact same time and shows a warning with pet name, task name, and a suggestion to stagger care.
-- **Daily and weekly recurrence** — Daily tasks auto-reschedule for tomorrow; weekly tasks reschedule 7 days out. Once tasks do not recur. Rescheduled tasks always start incomplete.
-- **Smart filtering** — Filter tasks by pet name (case-insensitive) or completion status (pending/completed), or combine both filters. Results stay sorted by time.
+- **AI Care Insights** — After generating a schedule, the app calls the RAG engine for each pet with health conditions and displays a personalized care insight with the knowledge sources used.
+- **RAG Engine** — Retrieves the top 3 relevant chunks from a veterinary knowledge base using keyword overlap scoring, then calls OpenAI to generate a structured insight.
+- **Few-shot specialization** — The prompt includes 2 examples that teach the model to respond in PawPal+'s voice: practical, calm, safety-first, with Morning/Midday/Evening sections.
+- **Agentic workflow** — A 3-step Analyze → Plan → Generate pipeline with observable intermediate steps in the logs.
+- **Test harness** — `evaluation.py` runs 4 predefined test cases and prints a pass/fail summary with confidence scores.
+- **Time-based sorting** — Tasks ordered chronologically with priority tie-breaking.
+- **Conflict warnings** — Flags overlapping tasks and suggests the next available slot.
+- **Data persistence** — Pets and tasks saved to `data.json` automatically.
+- **Custom UI theme** — Nunito font, purple-green gradient header, priority emojis 🔴🟡🟢.
 
 ---
 
 ## 🏗️ System Architecture
 
-The app follows a clean backend/frontend separation:
-
 ```
-pawpal_system.py  →  the backend (Owner, Pet, Task, Scheduler classes)
-app.py            →  the Streamlit UI (connects to backend via imports)
-main.py           →  CLI demo script (for terminal testing)
-tests/            →  automated pytest suite
+Pet Owner
+    ↓ adds pets & tasks
+PawPal+ Streamlit UI (app.py)
+    ↓ health_conditions + schedule context
+RAG Engine (rag_engine.py)
+    ↓ keyword query
+Knowledge Base (knowledge/*.md — 4 veterinary docs)
+    ↓ top 3 relevant chunks
+OpenAI GPT-4o-mini
+    ↓ care insight + sources
+PawPal+ Streamlit UI → displays 🧠 AI Care Insights
+
+evaluation.py → runs 4 test cases → 4/4 PASS, confidence 1.00
 ```
 
-Four core classes:
-- **Owner** — holds a name and a list of Pets
-- **Pet** — holds pet details and a list of Tasks
-- **Task** — represents a single care activity (time, duration, priority, frequency)
-- **Scheduler** — the brain: sorts, filters, detects conflicts, and generates the daily plan
+See `assets/system_architecture.png` for the full diagram.
 
-See `uml_final.png` for the full class diagram.
+**Core files:**
+- `pawpal_system.py` — backend: Owner, Pet, Task, Scheduler classes
+- `rag_engine.py` — RAG engine: retrieval, OpenAI call, agentic workflow, baseline
+- `app.py` — Streamlit UI
+- `evaluation.py` — automated test harness
+- `knowledge/` — 4 veterinary markdown documents
+- `assets/` — system architecture diagram and screenshots
 
 ---
 
@@ -53,6 +64,14 @@ See `uml_final.png` for the full class diagram.
 python -m venv .venv
 .venv\Scripts\activate       # Windows
 pip install -r requirements.txt
+```
+
+### Configure API key
+
+Create a `.env` file in the project root:
+
+```
+OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 ### Run the app
@@ -67,45 +86,120 @@ streamlit run app.py
 python main.py
 ```
 
----
-
-## 🧪 Testing PawPal+
+### Run the AI evaluation harness
 
 ```bash
-python -m pytest tests/ -v
+python evaluation.py
 ```
-
-The test suite covers 16 behaviors including:
-- Task completion and pet task management
-- Chronological sorting with priority tie-breaking
-- Filtering by pet name and completion status
-- Recurring task rescheduling (daily, weekly, once, unknown frequency)
-- Conflict detection (2 tasks, 3 tasks at same time)
-- Edge cases: empty owner, pet with no tasks, rescheduled task starts incomplete
 
 ---
 
-## 📸 Demo
+## 💬 Sample AI Interactions
 
-<a href="demo_screenshot.png" target="_blank">
-<img src='demo_screenshot.png' title='PawPal+ App' width='600' alt='PawPal App'/>
-</a>
+**Input 1:** Pet "Tobi", conditions: ["hip dysplasia"], schedule: morning walk at 07:00
 
+**Output:**
+```
+Morning:
+- Keep the walk short and gentle (10-15 minutes) on soft ground.
+- Conduct a quick mobility check before heading out.
 
-## 🚀 Optional Extensions Completed
+Midday:
+- Offer a short potty break with minimal walking.
+- Incorporate gentle stretching to keep muscles flexible.
 
-- **Challenge 1: Next Available Slot** — When conflicts 
-  are detected, the app suggests the next free time slot 
-  using interval-based overlap detection.
+Evening:
+- Use a calm leash walk, monitoring for limping or stiffness.
+- Engage in light range-of-motion play indoors.
 
-- **Challenge 2: Data Persistence** — Pets and tasks are 
-  saved to `data.json` automatically and reloaded on 
-  startup. Data survives page reloads and app restarts.
+Sources: hip_dysplasia.md, senior_pet_care.md
+```
 
-- **Challenge 3: Priority-Based Scheduling** — Users can 
-  switch between "By time (chronological)" and 
-  "By priority, then time" sort modes.
+---
 
-- **Challenge 4: Professional UI** — Custom pet-care theme 
-  with Nunito font, purple-green gradient header, priority 
-  emojis (🔴🟡🟢), and color-coded conflict warnings.
+**Input 2:** Pet "Luna", conditions: ["diabetes"], schedule: insulin injection at 08:00
+
+**Output:**
+```
+Insulin Schedule:
+- Give insulin at consistent times each day, paired with meals.
+- Record dose time and appetite to spot routine changes early.
+
+Monitoring:
+- Track thirst, urination, appetite, and energy for daily trends.
+- If weakness or disorientation appears, contact a vet urgently.
+
+Sources: diabetes_in_cats.md, general_pet_care.md
+```
+
+---
+
+**Input 3:** Pet "Max", conditions: [] (no conditions — general wellness)
+
+**Output:**
+```
+For Max, maintaining a consistent feeding schedule is essential
+for his general wellness. With feeding at 09:00, ensure fresh
+water is always available and monitor his appetite daily.
+
+Sources: general_pet_care.md
+```
+
+---
+
+## 🎯 Design Decisions
+
+**Why keyword matching instead of vector embeddings?**
+The knowledge base has 4 documents and 33 chunks. Keyword overlap scoring is fast, transparent, and easy to explain — which matters for a "trustworthy AI" requirement. Vector embeddings would add complexity and cost without a meaningful accuracy improvement at this scale.
+
+**Why OpenAI instead of Gemini?**
+Gemini's free tier quota was exhausted during development across multiple projects and API keys. OpenAI's `gpt-4o-mini` worked reliably on the first call and stayed within free tier limits throughout the project.
+
+**Why few-shot prompting?**
+Without examples, the model returned unstructured paragraph responses. Adding 2 examples produced consistent Morning/Midday/Evening sections with bullet points — measurably different from the baseline, as shown in `evaluation.py`.
+
+---
+
+## 🧪 Testing Summary
+
+```bash
+python -m pytest tests/ -v        # 24 unit tests — all passing
+python evaluation.py              # AI evaluation harness
+```
+
+**Unit tests (24):** Cover all scheduling behaviors, conflict detection, data persistence, recurring tasks, and edge cases.
+
+**AI evaluation (4 test cases):**
+- Test 1: Tobi / hip dysplasia → PASS
+- Test 2: Luna / diabetes → PASS
+- Test 3: Max / no conditions → PASS
+- Test 4: Bella / hip dysplasia + arthritis → PASS
+
+**Result: 4/4 passing — average confidence score: 1.00**
+
+What worked: retrieval correctly identified relevant chunks in all cases. The few-shot prompt produced structured, consistent output.
+
+What to improve: keyword matching sometimes retrieved chunks from unrelated documents. Semantic search would fix this.
+
+---
+
+## 🔁 Stretch Features Completed
+
+- ✅ **RAG Enhancement (+2)** — sources exposed in UI and evaluation output
+- ✅ **Agentic Workflow (+2)** — 3-step Analyze → Plan → Generate with observable `[AGENT]` logs
+- ✅ **Fine-Tuning/Specialization (+2)** — few-shot prompting produces structured output measurably different from baseline
+- ✅ **Test Harness (+2)** — `evaluation.py` runs predefined cases and prints pass/fail + confidence score
+
+---
+
+## 🎥 Demo Walkthrough
+
+[Loom video link — to be added before submission]
+
+---
+
+## 💡 Reflection
+
+This project taught me that a small, well-curated knowledge base with a simple retriever and a good prompt can produce genuinely useful AI output. You don't need a complex system to build something that actually helps people.
+
+The most important lesson: human oversight in AI-assisted development is not optional. The AI suggested the deprecated Gemini library, gave us wrong model names, and generated code that looked correct but wasn't. Every suggestion needed review. The architect is always the human.
